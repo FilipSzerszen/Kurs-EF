@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kurs EF", "Kurs EF\Kurs EF.csproj", "{F89EB67A-257E-4D02-A419-503C0E58BE50}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F89EB67A-257E-4D02-A419-503C0E58BE50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F89EB67A-257E-4D02-A419-503C0E58BE50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F89EB67A-257E-4D02-A419-503C0E58BE50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F89EB67A-257E-4D02-A419-503C0E58BE50}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B68BF646-B54E-41B0-9EFF-3409922E2083}
+	EndGlobalSection
+EndGlobal
