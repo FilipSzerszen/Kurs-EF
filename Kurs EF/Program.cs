@@ -19,5 +19,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+using var scope = app.Services.CreateScope();
+var DbContext = scope.ServiceProvider.GetService<MyBoardsContext>();
+
+var pendingMigrations = DbContext.Database.GetPendingMigrations();
+if (pendingMigrations.Any()) DbContext.Database.Migrate();
+
 app.Run();
 

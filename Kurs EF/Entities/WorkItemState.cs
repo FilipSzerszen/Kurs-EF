@@ -1,9 +1,9 @@
 ﻿namespace Kurs_EF.Entities
 {
-    public class State
+    public class WorkItemState
     {
         public int Id { get; set; }
         public string Value { get; set; }
-        public List<WorkItem> WorkItems { get; set; }=new List<WorkItem>();
+        //public List<WorkItem> WorkItems { get; set; }=new List<WorkItem>();
     }
 }
