@@ -22,6 +22,7 @@ namespace Kurs_EF.Migrations
         }
 
         /// <inheritdoc />
+        //dodawanie danych do tabeli (encji) - seed-owanie danych - sposób 2 - podczas migracji
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(

@@ -4,6 +4,7 @@ using Kurs_EF.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kurs_EF.Migrations
 {
     [DbContext(typeof(MyBoardsContext))]
-    partial class MyBoardsContextModelSnapshot : ModelSnapshot
+    [Migration("20230426070332_NewDataSeed")]
+    partial class NewDataSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,6 +96,9 @@ namespace Kurs_EF.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -236,7 +242,7 @@ namespace Kurs_EF.Migrations
 
                     b.HasIndex("WorkItemId");
 
-                    b.ToTable("WorkItemTag");
+                    b.ToTable("WorkitemTag");
                 });
 
             modelBuilder.Entity("Kurs_EF.Entities.Epic", b =>

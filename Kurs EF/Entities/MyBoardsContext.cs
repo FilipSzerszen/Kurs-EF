@@ -14,7 +14,7 @@ namespace Kurs_EF.Entities
         public DbSet<User> Users { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<WorkItemState> WorkItemStates { get; set; }
-
+        public DbSet<WorkitemTag> WorkItemTag { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -90,12 +90,16 @@ namespace Kurs_EF.Entities
                 //eb.HasMany(s => s.WorkItems).WithOne(wi=>wi.State).HasForeignKey(s => s.State.Id);
             });
 
+            //dodawanie danych do tabeli (encji) - seed-owanie danych - sposób 1 - model data seed 
             modelBuilder.Entity<WorkItemState>()
                 .HasData(new WorkItemState() { Id=1, Value = "To do" },
-                        new WorkItemState() { Id=2, Value = "Doiing" },
+                        new WorkItemState() { Id=2, Value = "Doing" },
                         new WorkItemState() { Id=3, Value = "Done" });
-            
 
+            modelBuilder.Entity<Tag>()
+                .HasData(new Tag() { Id = 3, Value = "Desktop" },
+                        new Tag() { Id = 4, Value = "Api" },
+                        new Tag() { Id = 5, Value = "Service" });
             //modelBuilder.Entity<WorkitemTag>().HasKey(c => new { c.TagId, c.WorkItemId });
 
         }
