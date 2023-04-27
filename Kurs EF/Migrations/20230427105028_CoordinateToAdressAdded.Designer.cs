@@ -4,6 +4,7 @@ using Kurs_EF.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kurs_EF.Migrations
 {
     [DbContext(typeof(MyBoardsContext))]
-    partial class MyBoardsContextModelSnapshot : ModelSnapshot
+    [Migration("20230427105028_CoordinateToAdressAdded")]
+    partial class CoordinateToAdressAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace Kurs_EF.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Adresses", (string)null);
+                    b.ToTable("Adresses");
                 });
 
             modelBuilder.Entity("Kurs_EF.Entities.Comment", b =>
@@ -83,7 +86,7 @@ namespace Kurs_EF.Migrations
 
                     b.HasIndex("WorkItemId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Kurs_EF.Entities.Tag", b =>
@@ -99,7 +102,7 @@ namespace Kurs_EF.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
 
                     b.HasData(
                         new
@@ -138,7 +141,7 @@ namespace Kurs_EF.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Kurs_EF.Entities.WorkItem", b =>
@@ -177,7 +180,7 @@ namespace Kurs_EF.Migrations
 
                     b.HasIndex("StateId");
 
-                    b.ToTable("WorkItems", (string)null);
+                    b.ToTable("WorkItems");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("WorkItem");
 
@@ -199,7 +202,7 @@ namespace Kurs_EF.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WorkItemStates", (string)null);
+                    b.ToTable("WorkItemStates");
 
                     b.HasData(
                         new
@@ -236,7 +239,7 @@ namespace Kurs_EF.Migrations
 
                     b.HasIndex("WorkItemId");
 
-                    b.ToTable("WorkItemTag", (string)null);
+                    b.ToTable("WorkItemTag");
                 });
 
             modelBuilder.Entity("Kurs_EF.ViewModels.TopAuthor", b =>
@@ -299,7 +302,7 @@ namespace Kurs_EF.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Kurs_EF.Entities.Adress.Coordinates#Kurs_EF.Entities.Coordinate", "Coordinates", b1 =>
+                    b.OwnsOne("Kurs_EF.Entities.Coordinate", "Coordinates", b1 =>
                         {
                             b1.Property<Guid>("AdressId")
                                 .HasColumnType("uniqueidentifier");
@@ -314,7 +317,7 @@ namespace Kurs_EF.Migrations
 
                             b1.HasKey("AdressId");
 
-                            b1.ToTable("Adresses", (string)null);
+                            b1.ToTable("Adresses");
 
                             b1.WithOwner()
                                 .HasForeignKey("AdressId");
