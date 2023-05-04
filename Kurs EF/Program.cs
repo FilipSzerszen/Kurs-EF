@@ -1,12 +1,18 @@
+using Kurs_EF;
 using Kurs_EF.Dto;
 using Kurs_EF.Entities;
+using Kurs_EF.Sieve;
 using Microsoft.AspNetCore.Http.Json;
+//using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using Sieve.Services;
 using System.Linq.Expressions;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<ISieveProcessor, ApplicationSieveProcessor>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<JsonOptions>(options =>
@@ -16,7 +22,7 @@ builder.Services.Configure<JsonOptions>(options =>
 
 builder.Services.AddDbContext<MyBoardsContext>(
     option => option
-    //.UseLazyLoadingProxies()
+    .UseLazyLoadingProxies()
     .UseSqlServer(builder.Configuration.GetConnectionString("MyBoardsConnectionString"))
     );
 
@@ -35,36 +41,38 @@ var DbContext = scope.ServiceProvider.GetService<MyBoardsContext>();
 var pendingMigrations = DbContext.Database.GetPendingMigrations();
 if (pendingMigrations.Any()) DbContext.Database.Migrate();
 
+DataGenerator.Seed(DbContext); //dodawanie generowanych danych testowych do tabeli (encji) - seed-owanie danych - sposób 4
+
 //dodawanie danych do tabeli (encji) - seed-owanie danych - sposób 3
-var user = DbContext.Users.ToList();
-if (!user.Any())
-{
-    var user1 = new User()
-    {
-        Email = "fiszer@wp.pl",
-        FullName = "User One",
-        Adress = new Adress
-        {
-            Country = "Poland",
-            City = "Wroc³aw",
-            PostalCode = "12345",
-            Street = "prochowicka 45"
-        }
-    };
-    var user2 = new User()
-    {
-        Email = "konopka@wp.pl",
-        FullName = "User Two",
-        Adress = new Adress
-        {
-            Country = "Poland",
-            PostalCode = "67890",
-            Street = "wroc³awska 23"
-        }
-    };
-    DbContext.Users.AddRange(user1, user2);
-    DbContext.SaveChanges();
-}
+//var user = DbContext.Users.ToList();
+//if (!user.Any())
+//{
+//    var user1 = new User()
+//    {
+//        Email = "fiszer@wp.pl",
+//        FullName = "User One",
+//        Adress = new Adress
+//        {
+//            Country = "Poland",
+//            City = "Wroc³aw",
+//            PostalCode = "12345",
+//            Street = "prochowicka 45"
+//        }
+//    };
+//    var user2 = new User()
+//    {
+//        Email = "konopka@wp.pl",
+//        FullName = "User Two",
+//        Adress = new Adress
+//        {
+//            Country = "Poland",
+//            PostalCode = "67890",
+//            Street = "wroc³awska 23"
+//        }
+//    };
+//    DbContext.Users.AddRange(user1, user2);
+//    DbContext.SaveChanges();
+//}
 var tag = DbContext.Tags.ToList();
 if (tag.Count < 5)
 {
@@ -85,10 +93,38 @@ if (tag.Count < 5)
     DbContext.SaveChanges();
 }
 
+//app.MapPost("sieve", async ([FromBody] SieveModel query, ISieveProcessor sieveProcessor,
+//    MyBoardsContext db) =>
+//{
+//    var epics = db.Epics
+//                .Include(a => a.Author)
+//                .AsQueryable();
+
+//    var dtos = await sieveProcessor
+//                .Apply(query, epics)
+//                .Select(e => new EpicDto()
+//                {
+//                    Id = e.Id,
+//                    Area = e.Area,
+//                    Priority = e.Priority,
+//                    StartDate = e.StartDate,
+//                    AuthorFullName = e.Author.FullName
+//                })
+//                .ToListAsync();
+
+//    var totalCount = await sieveProcessor
+//                    .Apply(query, epics, applyPagination: false, applySorting: false)
+//                    .CountAsync();
+
+//    var result = new PagedResult<EpicDto>(dtos, totalCount, query.PageSize.Value, query.Page.Value);
+
+//    return result;
+//});
+
 app.MapGet("Pagination", async (MyBoardsContext db) =>
 {
     //teoretyczne dane ze strony od u¿ytkownika
-    var filter = "anna";
+    var filter = "a";
     string sortBy = null;  //"FulllName", "Email", null
     bool sortByDescending = false;
     int pageNumber = 1;
@@ -101,7 +137,7 @@ app.MapGet("Pagination", async (MyBoardsContext db) =>
 
     var totalCount = querry.Count();
 
-    if(sortBy != null)
+    if (sortBy != null)
     {
         var columnSelector = new Dictionary<string, Expression<Func<User, object>>>
         {
@@ -110,13 +146,13 @@ app.MapGet("Pagination", async (MyBoardsContext db) =>
         };
         var sortByExpression = columnSelector[sortBy];
 
-        querry = sortByDescending 
+        querry = sortByDescending
         ? querry.OrderByDescending(sortByExpression)
         : querry.OrderBy(sortByExpression);
     }
-    var result = querry.Skip(pageSize * (pageNumber - 1))
+    var result = await querry.Skip(pageSize * (pageNumber - 1))
                         .Take(pageSize)
-                        .ToList();
+                        .ToListAsync();
 
     var pagedResult = new PagedResult<User>(result, totalCount, pageSize, pageNumber);
     return pagedResult;
@@ -127,8 +163,8 @@ app.MapDelete("delete", async (MyBoardsContext db) =>
     var workItem = new Epic { Id = 2 };
     var entry = db.Attach(workItem);
     entry.State = EntityState.Deleted;
-    db.SaveChanges();
-    return user;
+    await db.SaveChangesAsync();
+    //return user;
 
     //var user = await db.Users
     //.Include(u => u.Comments)
@@ -154,7 +190,7 @@ app.MapDelete("delete", async (MyBoardsContext db) =>
 
 app.MapGet("View", async (MyBoardsContext db) =>
 {
-    var powi¹zanieKEYLESS = await db.Adresses.Where(a=>a.Coordinates.Longitude>10).ToListAsync();
+    var powi¹zanieKEYLESS = await db.Adresses.Where(a => a.Coordinates.Longitude > 10).ToListAsync();
     return powi¹zanieKEYLESS;
 
     //var TopAuthors = await db.ViewTopAuthors.ToListAsync();
@@ -163,15 +199,53 @@ app.MapGet("View", async (MyBoardsContext db) =>
 
 app.MapGet("Find", async (MyBoardsContext db) =>
 {
+    var users = await db.Users
+        .Include(u => u.Adress)
+        .Include(u => u.Comments)                   //  <-bez tego, a z tym i z wy³. lazy loading wystêpuje problem n+1
+        .Where(u => u.Adress.Country == "Poland") //                V
+        .ToListAsync();                           //                V              
+    foreach (var user in users)                   //                V  
+    {
+        var usercomments = user.Comments;         //= db.Comments.Where(c=>c.AuthorId == user.Id).ToList();
+        foreach (var comment in usercomments)
+        {
+            //process(comment);
+        }
+    }
+    return users;
 
-    var WIStates85 = db.WorkItemStates              //...Raw dla zapytañ bez zmiennych. Musz¹ byæ ujête wszystkie kolumny z DbSeta - tu Id, Value
-    .FromSqlRaw(@"SELECT wis.Id,  wis.Value, COUNT(*)
-                  FROM WorkItemStates wis
-                  Join WorkItems wi on wi.StateId = wis.Id
-                  GROUP BY wis.Id, wis.Value
-                  HAVING COUNT(*)>85")
-    .ToList();
-    return WIStates85;
+    //var users = await db.Users
+    //    .Include(u => u.Comments)         //  <-bez tego i z w³. lazy loading wystêpuje problem n+1
+    //    .Where(u => u.Adress.Country == "Poland")
+    //    .ToListAsync();
+    //foreach (var user in users)
+    //{
+    //    foreach (var comment in user.Comments)
+    //    {
+    //        //process(comment);
+    //    }
+    //}
+    //return users;
+
+    //var user = await db.Users
+    //.Include(u => u.Adress)
+    //.Include(u=>u.Comments)
+    //.Where(u => u.Adress.Country == "Poland")
+    //.SelectMany(u => u.Comments)                    //selekcja ma byæ w zapytaniu a nie w returnie!!!
+    //.Select(c => c.Message)
+    //.ToListAsync();
+
+    ////var comments = user.SelectMany(u => u.Comments).Select(c=>c.Message);
+    //return user;
+
+    //var WIStates85 = await db.WorkItemStates          //...Raw dla zapytañ bez zmiennych. Musz¹ byæ ujête wszystkie kolumny z DbSeta - tu Id, Value
+    //.FromSqlRaw(@"SELECT wis.Id,  wis.Value, COUNT(*)
+    //              FROM WorkItemStates wis
+    //              Join WorkItems wi on wi.StateId = wis.Id
+    //              GROUP BY wis.Id, wis.Value
+    //              HAVING COUNT(*)>85")
+    //.ToListAsync();
+    //return WIStates85;
 
     //var minWIcounts = 85;
     //var workItemStates85 = db.WorkItemStates           //...Interpolated dla zapytañ ze zmiennymi. Musz¹ byæ ujête wszystkie kolumny z DbSeta
